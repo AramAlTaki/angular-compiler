@@ -1,67 +1,77 @@
 parser grammar AngularParser;
 
-options {
-    tokenVocab = AngularLexer;
-}
+options { tokenVocab = AngularLexer; }
 
 program
-    : importStatement* componentDefinition+ EOF
+    : importStatement* (interfaceDeclaration | componentDefinition)+ EOF
     ;
 
 importStatement
-    : IMPORT importItems FROM modulePath SEMI?                  #importStmt
+    : IMPORT importItems FROM modulePath SEMI?                     #importStmt
     ;
 
 importItems
-    : LBRACE importItem (COMMA importItem)* RBRACE              #importItemList
+    : LBRACE importItem (COMMA importItem)* RBRACE                 #importItemList
     ;
 
 importItem
-    : IDENTIFIER                                                #importName
+    : IDENTIFIER                                                  #importName
     ;
 
 modulePath
-    : STRING_LITERAL                                            #modulePathString
+    : STRING_LITERAL                                              #modulePathString
     ;
 
+// interfaces
+interfaceDeclaration
+    : INTERFACE IDENTIFIER LBRACE interfaceMember* RBRACE         #interfaceDecl
+    ;
+
+interfaceMember
+    : IDENTIFIER COLON typeAnnotation SEMI?                        #interfaceMemberDecl
+    ;
+
+// component
 componentDefinition
-    : COMPONENT LPAREN componentConfig RPAREN classDeclaration  #componentDef
+    : COMPONENT LPAREN componentConfig RPAREN classDeclaration     #componentDef
     ;
 
 componentConfig
-    : LBRACE componentProperty (COMMA componentProperty)* RBRACE  #componentConfigObj
+    : LBRACE componentProperty (COMMA componentProperty)* RBRACE   #componentConfigObj
     ;
 
 componentProperty
-    : SELECTOR COLON STRING_LITERAL       #selectorProp
-    | STANDALONE COLON booleanLiteral     #standaloneProp
-    | IMPORTS COLON arrayLiteral          #importsProp
-    | TEMPLATE COLON BACKTICK_LITERAL     #templateProp
-    | STYLES COLON arrayLiteral           #stylesProp
+    : SELECTOR COLON STRING_LITERAL                                #selectorProp
+    | STANDALONE COLON booleanLiteral                              #standaloneProp
+    | IMPORTS COLON arrayLiteral                                   #importsProp
+    | TEMPLATE COLON BACKTICK_OPEN templateHtml BACKTICK_CLOSE     #templateProp
+    | STYLES COLON arrayLiteral                                    #stylesProp
     ;
 
+// arrays
 arrayLiteral
-    : LBRACKET (arrayItem (COMMA arrayItem)*)? RBRACKET         #arrayLiteralExpr
+    : LBRACKET (arrayItem (COMMA arrayItem)*)? RBRACKET            #arrayLiteralExpr
     ;
 
 arrayItem
-    : BACKTICK_LITERAL    #templateItem
-    | STRING_LITERAL      #stringItem
-    | IDENTIFIER          #identifierItem
-    | objectLiteral       #objectItem
+    : BACKTICK_OPEN cssOrTemplateItem BACKTICK_CLOSE               #templateItem
+    | STRING_LITERAL                                              #stringItem
+    | IDENTIFIER                                                  #identifierItem
+    | objectLiteral                                               #objectItem
     ;
 
+// class
 classDeclaration
-    : EXPORT? CLASS IDENTIFIER LBRACE classBody RBRACE          #classDecl
+    : EXPORT? CLASS IDENTIFIER LBRACE classBody RBRACE            #classDecl
     ;
 
 classBody
-    : classMember*         #classBodyMembers
+    : classMember*                                                 #classBodyMembers
     ;
 
 classMember
-    : fieldDeclaration     #fieldMember
-    | methodDeclaration    #methodMember
+    : fieldDeclaration                                             #fieldMember
+    | methodDeclaration                                            #methodMember
     ;
 
 fieldDeclaration
@@ -73,33 +83,35 @@ methodDeclaration
     ;
 
 parameterList
-    : parameter (COMMA parameter)*                              #paramList
+    : parameter (COMMA parameter)*                                 #paramList
     ;
 
 parameter
-    : IDENTIFIER COLON typeAnnotation                           #param
+    : IDENTIFIER COLON typeAnnotation                              #param
     ;
 
+// types
 typeAnnotation
-    : typePrimary (LBRACKET RBRACKET)?                          #typeAnnotated
+    : typePrimary (LBRACKET RBRACKET)?                             #typeAnnotated
     ;
 
 typePrimary
-    : IDENTIFIER              #typeIdent
-    | ANY                     #typeAny
-    | inlineObjectType        #inlineObjType
+    : IDENTIFIER                #typeIdent
+    | ANY                       #typeAny
+    | inlineObjectType          #inlineObjType
     ;
 
 inlineObjectType
-    : LBRACE members+=objectTypeMember (SEMI members+=objectTypeMember)* SEMI? RBRACE #inlineObj
+    : LBRACE (objectTypeMember (SEMI objectTypeMember)*)? SEMI? RBRACE #inlineObj
     ;
 
 objectTypeMember
-    : IDENTIFIER COLON typeAnnotation                           #objectTypeMemberRule
+    : IDENTIFIER COLON typeAnnotation                               #objectTypeMemberRule
     ;
 
+// blocks & statements
 block
-    : LBRACE statement* RBRACE                                  #codeBlock
+    : LBRACE statement* RBRACE                                      #codeBlock
     ;
 
 statement
@@ -119,15 +131,15 @@ variableDeclaration
     ;
 
 expressionStatement
-    : expression SEMI                                           #exprStatement
+    : expression SEMI                                               #exprStatement
     ;
 
 returnStatement
-    : RETURN expression? SEMI                                   #returnStatementExpr
+    : RETURN expression? SEMI                                       #returnStatementExpr
     ;
 
 ifStatement
-    : IF LPAREN expression RPAREN statement (ELSE statement)?   #ifElseStmt
+    : IF LPAREN expression RPAREN statement (ELSE statement)?       #ifElseStmt
     ;
 
 forStatement
@@ -139,37 +151,38 @@ breakStatement
     ;
 
 forInit
-    : variableDeclaration   #forVarInit
-    | expression            #forExprInit
-    |                       #emptyForInit
+    : variableDeclaration     #forVarInit
+    | expression              #forExprInit
+    |                         #emptyForInit
     ;
 
 whileStatement
-    : WHILE LPAREN expression RPAREN statement                  #whileLoop
+    : WHILE LPAREN expression RPAREN statement                      #whileLoop
     ;
 
+// expressions
 expression
-    : assignmentExpression                                      #exprAssignment
+    : assignmentExpression                                          #exprAssignment
     ;
 
 assignmentExpression
-    : conditionalExpression (EQUALS assignmentExpression)?      #assignExpr
+    : conditionalExpression (EQUALS assignmentExpression)?          #assignExpr
     ;
 
 conditionalExpression
-    : logicalOrExpression (QUESTION expression COLON expression)? #condExpr
+    : logicalOrExpression (QUESTION expression COLON expression)?   #condExpr
     ;
 
 logicalOrExpression
-    : logicalAndExpression (OR logicalAndExpression)*           #logicalOrExpr
+    : logicalAndExpression (OR logicalAndExpression)*               #logicalOrExpr
     ;
 
 logicalAndExpression
-    : equalityExpression (AND equalityExpression)*              #logicalAndExpr
+    : equalityExpression (AND equalityExpression)*                 #logicalAndExpr
     ;
 
 equalityExpression
-    : relationalExpression ((EQ | NEQ) relationalExpression)*   #equalityExpr
+    : relationalExpression ((EQ | NEQ) relationalExpression)*      #equalityExpr
     ;
 
 relationalExpression
@@ -181,33 +194,33 @@ additiveExpression
     ;
 
 multiplicativeExpression
-    : unaryExpression ((MULT | DIV | MOD) unaryExpression)*     #multExpr
+    : unaryExpression ((MULT | DIV | MOD) unaryExpression)*        #multExpr
     ;
 
 unaryExpression
-    : (NOT | MINUS)? postfixExpression                          #unaryExpr
+    : (NOT | MINUS)? postfixExpression                              #unaryExpr
     ;
 
 postfixExpression
-    : primaryExpression postfixPart*                            #postfixExpr
+    : primaryExpression postfixPart*                                #postfixExpr
     ;
 
 postfixPart
-    : functionCall                                              #funcCall
-    | propertyAccess                                            #propertyAcc
-    | postfixIncrement                                          #postFixIncr
+    : functionCall                                                  #funcCall
+    | propertyAccess                                                #propertyAcc
+    | postfixIncrement                                              #postFixIncr
     ;
 
 functionCall
-    : LPAREN (expression (COMMA expression)*)? RPAREN           #functCall
+    : LPAREN (expression (COMMA expression)*)? RPAREN               #functCall
     ;
 
 propertyAccess
-    : DOT IDENTIFIER                                            #propertyAccessing
+    : DOT IDENTIFIER                                                #propertyAccessing
     ;
 
 postfixIncrement
-    : INCREMENT                                                 #postfixInc
+    : INCREMENT                                                     #postfixInc
     ;
 
 primaryExpression
@@ -226,24 +239,23 @@ newExpression
     ;
 
 arrowFunction
-    : LPAREN arrowParams? RPAREN ARROW expression               #arrowFunctionExpr
+    : LPAREN arrowParams? RPAREN ARROW expression                   #arrowFunctionExpr
     ;
 
 arrowParams
-    : IDENTIFIER (COMMA IDENTIFIER)*                            #arrowParamsList
+    : IDENTIFIER (COMMA IDENTIFIER)*                                #arrowParamsList
     ;
 
 objectLiteral
-    : LBRACE (keyValue (COMMA keyValue)*)? RBRACE               #objLiteral
+    : LBRACE (keyValue (COMMA keyValue)*)? RBRACE                   #objLiteral
     ;
 
 keyValue
-    : IDENTIFIER COLON expression                               #keyValuePair
+    : IDENTIFIER COLON expression                                   #keyValuePair
     ;
 
 literal
     : STRING_LITERAL         #stringLiteral
-    | BACKTICK_LITERAL       #templateLiteral
     | NUMBER                 #numberLiteral
     | booleanLiteral         #boolLiteral
     ;
@@ -256,3 +268,79 @@ booleanLiteral
 qualifiedName
     : IDENTIFIER (DOT IDENTIFIER)*             #qualifiedNameExpr
     ;
+
+// Template HTML parsing
+templateHtml
+    : templateNode*
+    ;
+
+templateNode
+    : element
+    | interpolation
+    | htmlText
+    ;
+
+element
+    : HTML_LT HTML_NAME attribute* HTML_GT templateNode* HTML_END_LT HTML_NAME HTML_GT
+    | HTML_LT HTML_NAME attribute* HTML_SLASH_GT
+    ;
+
+attribute
+    : plainAttribute
+    | boundProperty
+    | boundEvent
+    | twoWayBinding
+    | structuralDirective
+    ;
+
+plainAttribute
+    : HTML_NAME (HTML_EQ TPL_STRING)?
+    ;
+
+boundProperty
+    : ATTR_LBRACK HTML_NAME ATTR_RBRACK HTML_EQ TPL_STRING
+    ;
+
+boundEvent
+    : ATTR_LPAREN HTML_NAME ATTR_RPAREN HTML_EQ TPL_STRING
+    ;
+
+twoWayBinding
+    : ATTR_LBRACK ATTR_LPAREN HTML_NAME ATTR_RPAREN ATTR_RBRACK HTML_EQ TPL_STRING
+    ;
+
+structuralDirective
+    : ATTR_STAR HTML_NAME HTML_EQ TPL_STRING
+    ;
+
+interpolation
+    : INTERPOLATION
+    ;
+
+htmlText
+    : HTML_TEXT+
+    ;
+
+// CSS or template island used for styles array items
+cssOrTemplateItem
+    : cssRules
+    | templateHtml
+    ;
+
+// css
+cssRules
+    : (cssRule | cssText)*
+    ;
+
+cssRule
+    : CSS_IDENT CSS_LBRACE cssDeclaration* CSS_RBRACE
+    ;
+
+cssDeclaration
+    : CSS_IDENT CSS_COLON CSS_TEXT CSS_SEMI?
+    ;
+
+cssText
+    : CSS_TEXT
+    ;
+

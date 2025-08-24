@@ -45,6 +45,20 @@ public interface AngularParserVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitModulePathString(AngularParser.ModulePathStringContext ctx);
 	/**
+	 * Visit a parse tree produced by the {@code interfaceDecl}
+	 * labeled alternative in {@link AngularParser#interfaceDeclaration}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitInterfaceDecl(AngularParser.InterfaceDeclContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code interfaceMemberDecl}
+	 * labeled alternative in {@link AngularParser#interfaceMember}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitInterfaceMemberDecl(AngularParser.InterfaceMemberDeclContext ctx);
+	/**
 	 * Visit a parse tree produced by the {@code componentDef}
 	 * labeled alternative in {@link AngularParser#componentDefinition}.
 	 * @param ctx the parse tree
@@ -583,13 +597,6 @@ public interface AngularParserVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitStringLiteral(AngularParser.StringLiteralContext ctx);
 	/**
-	 * Visit a parse tree produced by the {@code templateLiteral}
-	 * labeled alternative in {@link AngularParser#literal}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitTemplateLiteral(AngularParser.TemplateLiteralContext ctx);
-	/**
 	 * Visit a parse tree produced by the {@code numberLiteral}
 	 * labeled alternative in {@link AngularParser#literal}.
 	 * @param ctx the parse tree
@@ -624,4 +631,100 @@ public interface AngularParserVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitQualifiedNameExpr(AngularParser.QualifiedNameExprContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link AngularParser#templateHtml}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitTemplateHtml(AngularParser.TemplateHtmlContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link AngularParser#templateNode}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitTemplateNode(AngularParser.TemplateNodeContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link AngularParser#element}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitElement(AngularParser.ElementContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link AngularParser#attribute}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitAttribute(AngularParser.AttributeContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link AngularParser#plainAttribute}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitPlainAttribute(AngularParser.PlainAttributeContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link AngularParser#boundProperty}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitBoundProperty(AngularParser.BoundPropertyContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link AngularParser#boundEvent}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitBoundEvent(AngularParser.BoundEventContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link AngularParser#twoWayBinding}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitTwoWayBinding(AngularParser.TwoWayBindingContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link AngularParser#structuralDirective}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitStructuralDirective(AngularParser.StructuralDirectiveContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link AngularParser#interpolation}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitInterpolation(AngularParser.InterpolationContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link AngularParser#htmlText}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitHtmlText(AngularParser.HtmlTextContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link AngularParser#cssOrTemplateItem}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitCssOrTemplateItem(AngularParser.CssOrTemplateItemContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link AngularParser#cssRules}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitCssRules(AngularParser.CssRulesContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link AngularParser#cssRule}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitCssRule(AngularParser.CssRuleContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link AngularParser#cssDeclaration}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitCssDeclaration(AngularParser.CssDeclarationContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link AngularParser#cssText}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitCssText(AngularParser.CssTextContext ctx);
 }
